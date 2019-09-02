@@ -173,12 +173,12 @@ class API(object):
         ask_for_code=False,
         set_device=True,
         generate_all_uuids=True,
-        is_threaded=False,
+        solve_challenge=False,
+        solve_2fa=False
     ):
         if password is None:
             username, password = get_credentials(username=username)
 
-        set_device = generate_all_uuids = True
         self.set_user(username, password)
         self.session = requests.Session()
 
@@ -245,11 +245,9 @@ class API(object):
                 self.login_flow(True)
                 # self.device_id = self.uuid
                 return True
-            elif (
-                self.last_json.get("error_type", "") == "checkpoint_challenge_required"
-            ):
+            elif self.last_json.get("error_type", "") == "checkpoint_challenge_required":
                 self.logger.info("Checkpoint challenge required...")
-                if ask_for_code is True:
+                if solve_challenge is True:
                     solved = self.solve_challenge()
                     if solved:
                         self.save_successful_login()
@@ -259,6 +257,56 @@ class API(object):
                         self.save_failed_login()
                         return False
                 else:
+                    self.save_failed_login()
+                    return False
+            elif self.last_json.get("two_factor_required"):
+                self.logger.info("Two-factor authentication required")
+                if solve_2fa is True:
+                    two_factor_code = input("Enter 2FA verification code: ")
+                    two_factor_id = self.last_json["two_factor_info"]["two_factor_identifier"]
+
+                    login = self.session.post(
+                        config.API_URL + "accounts/two_factor_login/",
+                        data={
+                            "username": self.username,
+                            "verification_code": two_factor_code,
+                            "two_factor_identifier": two_factor_id,
+                            "password": self.password,
+                            "device_id": self.device_id,
+                            "ig_sig_key_version": 4,
+                        },
+                        allow_redirects=True,
+                    )
+
+                    if login.status_code == 200:
+                        resp_json = json.loads(login.text)
+                        if resp_json["status"] != "ok":
+                            if "message" in resp_json:
+                                self.logger.error(
+                                    "Login error: {}".format(resp_json["message"])
+                                )
+                            else:
+                                self.logger.error(
+                                    'Login error: "{}" status and message {}.'.format(
+                                        resp_json["status"], login.text
+                                    )
+                                )
+                                self.save_failed_login()
+                            return False
+                        self.save_successful_login()
+                        self.login_flow(True)
+                        return True
+                    else:
+                        self.logger.error(
+                            "Two-factor authentication request returns {} error with message {} !".format(
+                                login.status_code, login.text
+                            )
+                        )
+                        self.save_failed_login()
+                        return False
+                # End of Interactive Two-Factor Authentication
+                else:
+                    self.save_failed_login()
                     return False
             else:
                 self.save_failed_login()
@@ -329,7 +377,7 @@ class API(object):
         if last_json.get("step_name", "") == "delta_login_review":
             choices.append("Login attempt challenge received")
             choices.append("0 - It was me")
-            choices.append("0 - It wasn't me")
+            choices.append("1 - It wasn't me")
 
         if not choices:
             choices.append(
@@ -338,6 +386,10 @@ class API(object):
             choices.append("0 - Default")
 
         return choices
+
+    def was_me(self, challenge_url, was_me=True):
+        data = json.dumps({"choice": 0 if was_me is True else 1})
+        return self.send_request(challenge_url, data, login=True)
 
     def logout(self, *args, **kwargs):
         if not self.is_logged_in:
@@ -431,58 +483,11 @@ class API(object):
                 )
                 time.sleep(sleep_minutes * 60)
             elif response.status_code == 400:
-                response_data = json.loads(response.text)
-
-                # PERFORM Interactive Two-Factor Authentication
-                if response_data.get("two_factor_required"):
-                    self.logger.info("Two-factor authentication required")
-                    two_factor_code = input("Enter 2FA verification code: ")
-                    two_factor_id = response_data["two_factor_info"][
-                        "two_factor_identifier"
-                    ]
-
-                    login = self.session.post(
-                        config.API_URL + "accounts/two_factor_login/",
-                        data={
-                            "username": self.username,
-                            "verification_code": two_factor_code,
-                            "two_factor_identifier": two_factor_id,
-                            "password": self.password,
-                            "device_id": self.device_id,
-                            "ig_sig_key_version": 4,
-                        },
-                        allow_redirects=True,
-                    )
-
-                    if login.status_code == 200:
-                        resp_json = json.loads(login.text)
-                        if resp_json["status"] != "ok":
-                            if "message" in resp_json:
-                                self.logger.error(
-                                    "Login error: {}".format(resp_json["message"])
-                                )
-                            else:
-                                self.logger.error(
-                                    'Login error: "{}" status and message {}.'.format(
-                                        resp_json["status"], login.text
-                                    )
-                                )
-                            return False
-                        return True
-                    else:
-                        self.logger.error(
-                            "Two-factor authentication request returns {} error with message {} !".format(
-                                login.status_code, login.text
-                            )
-                        )
-                        return False
-                # End of Interactive Two-Factor Authentication
-                else:
-                    msg = "Instagram's error message: {}"
-                    self.logger.info(msg.format(response_data.get("message")))
-                    if "error_type" in response_data:
-                        msg = "Error type: {}".format(response_data["error_type"])
-                    self.logger.info(msg)
+                msg = "Instagram's error message: {}"
+                self.logger.info(msg.format(response_data.get("message")))
+                if "error_type" in response_data:
+                    msg = "Error type: {}".format(response_data["error_type"])
+                self.logger.info(msg)
 
             # For debugging
             try:
