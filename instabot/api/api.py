@@ -204,7 +204,9 @@ class API(object):
                     cookie_is_loaded = True
                     self.save_successful_login()
                 else:
-                    self.logger.info("Login flow failed, the cookie is broken. Relogin again.")
+                    self.logger.info(
+                        "Login flow failed, the cookie is broken. Relogin again."
+                    )
                     set_device = generate_all_uuids = False
                     force = True
             # except Exception:
@@ -913,14 +915,26 @@ class API(object):
         url = "feed/only_me_feed/?rank_token={rank_token}&ranked_content=true&"
         return self.send_request(url.format(rank_token=self.rank_token))
 
-    def get_user_feed(self, user_id, max_id="", min_timestamp=None):
-        url = "feed/user/{user_id}/?max_id={max_id}&min_timestamp={min_timestamp}&rank_token={rank_token}&ranked_content=true"
-        url = url.format(
+    def get_user_feed(
+        self,
+        user_id,
+        exclude_comment=True,
+        only_fetch_first_carousel_media=False,
+        max_id=None,
+        ranked_content=None,
+        min_timestamp=None,
+    ):
+        url = "feed/user/{user_id}?exclude_comment={exclude_comment}&only_fetch_first_carousel_media={only_fetch_first_carousel_media}".format(
             user_id=user_id,
-            max_id=max_id,
-            min_timestamp=min_timestamp,
-            rank_token=self.rank_token,
+            exclude_comment=exclude_comment,
+            only_fetch_first_carousel_media=only_fetch_first_carousel_media,
         )
+        if max_id is not None:
+            url += "&max_id={}".format(max_id)
+        if ranked_content is not None:
+            url += "&ranked_content={}".format(ranked_content)
+        if min_timestamp is not None:
+            url += "&min_timestamp={}".format(min_timestamp)
         return self.send_request(url)
 
     def get_self_user_feed(self, max_id="", min_timestamp=None):
