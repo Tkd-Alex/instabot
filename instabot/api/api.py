@@ -319,7 +319,11 @@ class API(object):
         self.logger.info("Logged-in successfully as '{}'!".format(self.username))
 
     def save_failed_login(self):
-        self.logger.info("Username or password is incorrect.")
+        try:
+            self.logger.info(self.last_json.get("message", ""))
+        except Exception as e:
+            self.logger.info("Username or password is incorrect.")
+        self.is_logged_in = False
         delete_credentials()
 
     def solve_challenge(self):
@@ -391,6 +395,25 @@ class API(object):
     def was_me(self, challenge_url, was_me=True):
         data = json.dumps({"choice": 0 if was_me is True else 1})
         return self.send_request(challenge_url, data, login=True)
+
+    # {"message": "consent_required", "consent_data": {"headline": "Updates to Our Terms and Data Policy", "content": "We've updated our Terms and made some changes to our Data Policy. Please take a moment to review these ...", "button_text": "Review Now"}, "status": "fail"}
+    # /api/v1/consent/existing_user_flow/
+    # signed_body=ae07b2fbf6fd391d26285b242215e97f6b8f9fa015c68a32027c0d5624a35766.{"current_screen_key":"dob","_csrftoken":"74UWcG2CYmiLqRPIYENHkrimkFdhsLnL","day":"3","_uid":"19450998546","year":"1994","_uuid":"ffbe7b2f-1663-43d4-847b-c3f51803637e","month":"9"}&ig_sig_key_version=4
+    def consent_required(self, day=None, month=None, year=None):
+        if day is None:
+            day = random.randint(1, 28)
+        if month is None:
+            month = random.randint(1, 12)
+        if year is None:
+            year = random.randint(1961, 200)
+        data = self.json_data({
+            "current_screen_key": "dob",
+            "day": str(day),
+            "month": str(month),
+            "year": str(year)
+        })
+        url = "consent/existing_user_flow/"
+        return self.send_request(url, data)
 
     def logout(self, *args, **kwargs):
         if not self.is_logged_in:
@@ -1406,9 +1429,17 @@ class API(object):
             }
         )
         data = self.generate_signature(data)
-        return self.session.post(
+        response = self.session.post(
             "https://i.instagram.com/api/v2/" + "media/seen/", data=data
-        ).ok
+        )
+
+        self.last_response = response
+        try:
+            self.last_json = json.loads(response.text)
+        except JSONDecodeError:
+            pass
+
+        return response.ok
 
     def get_user_stories(self, user_id):
         url = "feed/user/{}/story/".format(user_id)
