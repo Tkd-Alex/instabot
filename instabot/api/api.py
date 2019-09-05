@@ -761,6 +761,18 @@ class API(object):
             base64.b64encode(data.encode("ascii")),
         )
 
+    def check_offensive_comment(self, comment_text):
+        return self.send_request(
+            endpoint="media/comment/check_offensive_comment/",
+            post=self.json_data(
+                self.action_data(
+                    {
+                        "comment_text": comment_text
+                    }
+                )
+            ),
+        )
+
     def comment(self, media_id, comment_text):
         return self.send_request(
             endpoint="media/{media_id}/comment/".format(media_id=media_id),
