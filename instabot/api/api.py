@@ -174,7 +174,8 @@ class API(object):
         set_device=True,
         generate_all_uuids=True,
         solve_challenge=False,
-        solve_2fa=False
+        solve_2fa=False,
+        is_threaded=True
     ):
         if password is None:
             username, password = get_credentials(username=username)
@@ -758,6 +759,18 @@ class API(object):
                 ).digest()
             ),
             base64.b64encode(data.encode("ascii")),
+        )
+
+    def check_offensive_comment(self, comment_text):
+        return self.send_request(
+            endpoint="media/comment/check_offensive_comment/",
+            post=self.json_data(
+                self.action_data(
+                    {
+                        "comment_text": comment_text
+                    }
+                )
+            ),
         )
 
     def comment(self, media_id, comment_text):
