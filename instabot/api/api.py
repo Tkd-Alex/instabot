@@ -1451,6 +1451,7 @@ class API(object):
         except JSONDecodeError:
             pass
 
+        self.total_requests += 1
         return response.ok
 
     def get_user_stories(self, user_id):
