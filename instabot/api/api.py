@@ -981,9 +981,9 @@ class API(object):
     def get_self_user_feed(self, max_id="", min_timestamp=None):
         return self.get_user_feed(self.user_id, max_id, min_timestamp)
 
-    def get_hashtag_feed(self, hashtag, max_id=""):
-        url = "feed/tag/{hashtag}/?max_id={max_id}&rank_token={rank_token}&ranked_content=true&"
-        url = url.format(hashtag=hashtag, max_id=max_id, rank_token=self.rank_token)
+    def get_hashtag_feed(self, hashtag, max_id="", ranked_content=True):
+        url = "feed/tag/{hashtag}/?max_id={max_id}&rank_token={rank_token}&ranked_content={ranked_content}&"
+        url = url.format(hashtag=hashtag, max_id=max_id, rank_token=self.rank_token, ranked_content=ranked_content)
         return self.send_request(url)
 
     def get_location_feed(self, location_id, max_id=""):
