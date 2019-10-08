@@ -1509,7 +1509,7 @@ class API(object):
         if page != 0:
             data.update({"page": page})
 
-        data = json.dumps(data)
+        data = self.json_data(data)
         url = "tags/{}/sections/".format(hashtag)
         return self.send_request(url, data, with_signature=False)
 
