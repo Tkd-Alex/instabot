@@ -1499,6 +1499,7 @@ class API(object):
 
     def get_hashtag_sections(self, hashtag, page=0, next_max_id="", next_media_ids=[], tab="recent"):
         data = {
+            "rank_token": self.rank_token,
             "next_max_id": next_max_id,
             "include_persistent": False,
             "tab": tab
@@ -1507,9 +1508,10 @@ class API(object):
             data.update({"next_media_ids": str(next_media_ids)})
         if page != 0:
             data.update({"page": page})
-        data = self.json_data(data)
+
+        data = json.dumps(data)
         url = "tags/{}/sections/".format(hashtag)
-        return self.send_request(url, data)
+        return self.send_request(url, data, with_signature=False)
 
     def get_media_insight(self, media_id):
         url = "insights/media_organic_insights/{}/?ig_sig_key_version={}".format(
