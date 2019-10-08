@@ -1486,6 +1486,7 @@ class API(object):
         url = "users/{}/following_tags_info/".format(user_id)
         return self.send_request(url)
 
+    """
     def get_hashtag_sections(self, hashtag):
         data = self.json_data(
             {
@@ -1493,6 +1494,21 @@ class API(object):
                 "include_persistent": "true",
             }
         )
+        url = "tags/{}/sections/".format(hashtag)
+        return self.send_request(url, data)
+    """
+
+    def get_hashtag_sections(self, hashtag, page=0, next_max_id="", next_media_ids=[], tab="recent"):
+        data = {
+            "next_max_id": next_max_id,
+            "include_persistent": False,
+            "tab": tab
+        }
+        if next_media_ids != []:
+            data.update({"next_media_ids": str(next_media_ids)})
+        if page != 0:
+            data.update({"page": page})
+        data = self.json_data(data)
         url = "tags/{}/sections/".format(hashtag)
         return self.send_request(url, data)
 
