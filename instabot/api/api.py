@@ -1501,10 +1501,11 @@ class API(object):
     def get_hashtag_sections(self, hashtag, page=0, next_max_id="", next_media_ids=[], tab="recent"):
         data = {
             "rank_token": self.rank_token,
-            "max_id": next_max_id,
             "include_persistent": False,
             "tab": tab
         }
+        if next_max_id != "":
+            data.update({"max_id": next_max_id})
         if next_media_ids != []:
             data.update({"next_media_ids": str(next_media_ids)})
         if page != 0:
