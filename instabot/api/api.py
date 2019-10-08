@@ -1500,7 +1500,7 @@ class API(object):
     def get_hashtag_sections(self, hashtag, page=0, next_max_id="", next_media_ids=[], tab="recent"):
         data = {
             "rank_token": self.rank_token,
-            "next_max_id": next_max_id,
+            "max_id": next_max_id,
             "include_persistent": False,
             "tab": tab
         }
