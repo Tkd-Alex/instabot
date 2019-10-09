@@ -1486,32 +1486,21 @@ class API(object):
         url = "users/{}/following_tags_info/".format(user_id)
         return self.send_request(url)
 
-    """
-    def get_hashtag_sections(self, hashtag):
-        data = self.json_data(
-            {
-                "supported_tabs": "['top','recent','places']",
-                "include_persistent": "true",
-            }
-        )
-        url = "tags/{}/sections/".format(hashtag)
-        return self.send_request(url, data)
-    """
-
+    # Copied from burped device and SSL-Pinned IG-Version.
     def get_hashtag_sections(self, hashtag, page=0, next_max_id="", next_media_ids=[], tab="recent"):
-        data = {
-            "rank_token": self.rank_token,
-            "include_persistent": False,
-            "tab": tab
-        }
-        if next_max_id != "":
-            data.update({"max_id": next_max_id})
-        if next_media_ids != []:
-            data.update({"next_media_ids": str(next_media_ids)})
-        if page != 0:
-            data.update({"page": page})
+        data = "?_csrftoken={}".format(self.token)
+        data += "&rank_token={}".format(self.rank_token)
+        data += "&_uuid={}".format(self.uuid)
+        data += "&include_persistent={}".format(True)
+        data += "&tab={}".format(tab)
 
-        data = self.json_data(data)
+        if page != 0:
+            data += "&page={}".format(page)
+        if next_max_id != "":
+            data += "&max_id={}".format(next_max_id)
+        if next_media_ids != []:
+            data += "&next_media_ids={}".format(str(next_media_ids))
+
         url = "tags/{}/sections/".format(hashtag)
         return self.send_request(url, data, with_signature=False)
 
