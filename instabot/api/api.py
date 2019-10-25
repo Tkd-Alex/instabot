@@ -1537,6 +1537,50 @@ class API(object):
         url = "media/{}/{}/story_slider_vote/".format(media_id, slider_id)
         return self.send_request(url, self.json_data({"vote": vote}))
 
+    """
+    /api/v1/media/216241xxxx932_5658xxx17/178xx3572937/story_poll_vote/
+    signed_body=7c4a77f1fb5772xxxxxxxxxxc190dd2e968469789323.{"_csrftoken":"PLLbSfC53ZDxxxxx4QEYvxMJ","_uid":"17xxxx39","vote":"0","_uuid":"ffbe7bxxxxb-c3f51803637e"}&ig_sig_key_version=4
+    "story_polls":[
+        {
+            "x":0.5124582744210741,
+            "y":0.22404605674749803,
+            "z":0,
+            "width":0.415097946769426,
+            "height":0.072929970970078,
+            "rotation":0.0,
+            "is_pinned":0,
+            "is_hidden":0,
+            "is_sticker":1,
+            "poll_sticker":{
+                "id":"polling_sticker_vibrant",
+                "poll_id":178xx3572937,
+                "question":"",
+                "tallies":[
+                    {
+                    "text":"NOW!",
+                    "font_size":35.0,
+                    "count":242
+                    },
+                    {
+                    "text":"LATER",
+                    "font_size":35.0,
+                    "count":37
+                    }
+                ],
+                "promotion_tallies":null,
+                "viewer_can_vote":true,
+                "is_shared_result":false,
+                "finished":false
+            }
+        }
+    ]
+    """
+    def story_poll_vote(self, media_id, poll_id, vote=0, vote_random=True):
+        if vote_random is True:
+            vote = random.randint(0, 1)
+        url = "media/{}/{}/story_poll_vote/".format(media_id, poll_id)
+        return self.send_request(url, self.json_data({"vote": vote}))
+
     def get_user_stories(self, user_id):
         url = "feed/user/{}/story/".format(user_id)
         return self.send_request(url)
