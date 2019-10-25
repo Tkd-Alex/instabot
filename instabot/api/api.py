@@ -1454,45 +1454,45 @@ class API(object):
         return response.ok
 
     """
-    https://i.instagram.com/api/v1/media/216239xxxx1413/180616xxx1178/story_quiz_answer/
+    api/v1/media/216239xxxx1413/180616xxx1178/story_quiz_answer/
     answer=0&_csrftoken=PLLbSxxxxlnEt0ttA7F4QEYvxMJ&_uuid=ffbe7b2fxxxxxf51803637e
     "story_quizs":[
-    {
-        "x":0.750863481121392,
-        "y":0.8032984473240731,
-        "z":0,
-        "width":0.44030202326446105,
-        "height":0.230359627090983,
-        "rotation":0.0,
-        "is_pinned":0,
-        "is_hidden":0,
-        "is_sticker":1,
-        "quiz_sticker":{
-            "id":"quiz_sticker_default",
-            "quiz_id":180616xxx1178,
-            "question":"GUESS THE LOCATION",
-            "tallies":[
-                {
-                "text":"China \ud83c\udde8\ud83c\uddf3",
-                "count":566
-                },
-                {
-                "text":"Italy \ud83c\uddee\ud83c\uddf9",
-                "count":2144
-                },
-                {
-                "text":"Switzerland \ud83c\udde8\ud83c\udded",
-                "count":517
-                }
-            ],
-            "correct_answer":1,
-            "viewer_can_answer":true,
-            "finished":false,
-            "text_color":"#FFFFFF",
-            "start_background_color":"#CA2EE1",
-            "end_background_color":"#5EB1FF"
+        {
+            "x":0.750863481121392,
+            "y":0.8032984473240731,
+            "z":0,
+            "width":0.44030202326446105,
+            "height":0.230359627090983,
+            "rotation":0.0,
+            "is_pinned":0,
+            "is_hidden":0,
+            "is_sticker":1,
+            "quiz_sticker":{
+                "id":"quiz_sticker_default",
+                "quiz_id":180616xxx1178,
+                "question":"GUESS THE LOCATION",
+                "tallies":[
+                    {
+                    "text":"China \ud83c\udde8\ud83c\uddf3",
+                    "count":566
+                    },
+                    {
+                    "text":"Italy \ud83c\uddee\ud83c\uddf9",
+                    "count":2144
+                    },
+                    {
+                    "text":"Switzerland \ud83c\udde8\ud83c\udded",
+                    "count":517
+                    }
+                ],
+                "correct_answer":1,
+                "viewer_can_answer":true,
+                "finished":false,
+                "text_color":"#FFFFFF",
+                "start_background_color":"#CA2EE1",
+                "end_background_color":"#5EB1FF"
+            }
         }
-    }
     ]
     """
     def story_quiz_answer(self, media_id, quiz_id, answer=0):
@@ -1503,6 +1503,39 @@ class API(object):
             "_uuid": self.uuid
         }
         return self.send_request(url, data, with_signature=False)
+
+    """
+    /api/v1/media/216xxxx59723371_565xxxx417/1810xxxxxx2683/story_slider_vote/
+    signed_body=7c4a77f1fb5772xxxxxxxxxxc190dd2e968469789323.{"_csrftoken":"PLLbSfC53ZDxxxxx4QEYvxMJ","_uid":"17xxxx39","vote":"0.7019064","_uuid":"ffbe7bxxxxb-c3f51803637e"}&ig_sig_key_version=4
+    "story_sliders":[
+        {
+            "x":0.7047914994500051,
+            "y":0.341729222052124,
+            "z":1,
+            "width":0.372533219147195,
+            "height":0.097990439015881,
+            "rotation":-0.021944279891116,
+            "is_pinned":0,
+            "is_hidden":0,
+            "is_sticker":1,
+            "slider_sticker":{
+                "slider_id":1810xxxxxx2683,
+                "question":"In love?",
+                "emoji":"\ud83d\ude0d",
+                "text_color":"#FFFFFF",
+                "background_color":"#3897F0",
+                "viewer_can_vote":true,
+                "slider_vote_average":0.9468325791855203,
+                "slider_vote_count":221
+            }
+        }
+    ]
+    """
+    def story_slider_vote(self, media_id, slider_id, vote=0.5000000, vote_random=True):
+        if vote_random is True:
+            vote = round(random.uniform(0.10, 1), 7)
+        url = "media/{}/{}/story_slider_vote/".format(media_id, slider_id)
+        return self.send_request(url, self.json_data({"vote": vote}))
 
     def get_user_stories(self, user_id):
         url = "feed/user/{}/story/".format(user_id)
