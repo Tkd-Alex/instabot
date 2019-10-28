@@ -192,7 +192,6 @@ def load_uuid_and_cookie(self, load_uuid=True, load_cookie=True):
             self.last_experiments = data["timing_value"]["last_experiments"]
 
             if load_cookie:
-                self.logger.debug("Loading cookies")
                 self.session.cookies = requests.utils.cookiejar_from_dict(
                     data["cookie"]
                 )
@@ -200,7 +199,6 @@ def load_uuid_and_cookie(self, load_uuid=True, load_cookie=True):
                 assert cookie_username == self.username
 
             if load_uuid:
-                self.logger.debug("Loading uuids")
                 self.phone_id = data["uuids"]["phone_id"]
                 self.uuid = data["uuids"]["uuid"]
                 self.client_session_id = data["uuids"]["client_session_id"]
@@ -210,6 +208,7 @@ def load_uuid_and_cookie(self, load_uuid=True, load_cookie=True):
                 self.device_settings = data["device_settings"]
                 self.user_agent = data["user_agent"]
 
+            """
             self.logger.info(
                 "Recovery from {}: COOKIE {} - UUIDs {} - TIMING, DEVICE and ... \n- user-agent={}\n- phone_id={}\n- uuid={}\n- client_session_id={}\n- device_id={}".format(
                     self.cookie_fname,
@@ -220,6 +219,14 @@ def load_uuid_and_cookie(self, load_uuid=True, load_cookie=True):
                     self.uuid,
                     self.client_session_id,
                     self.device_id,
+                )
+            )
+            """
+            self.logger.info(
+                "Recovery from {}: COOKIE {} - UUIDs {} - TIMING, DEVICE and OTHER DATAS...".format(
+                    self.cookie_fname,
+                    load_cookie,
+                    load_uuid
                 )
             )
         else:
