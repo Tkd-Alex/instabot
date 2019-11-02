@@ -481,11 +481,12 @@ class API(object):
             except JSONDecodeError:
                 return False
         else:
-            # print(endpoint, post, response.content)
+            """
             if response.status_code != 404 and response.status_code != "404":
                 self.logger.error(
                     "Request returns {} error!".format(response.status_code)
                 )
+            """
             try:
                 response_data = json.loads(response.text)
                 if "feedback_required" in str(response_data.get("message")):
@@ -506,12 +507,14 @@ class API(object):
                     "for {} minutes.".format(sleep_minutes)
                 )
                 time.sleep(sleep_minutes * 60)
+            """
             elif response.status_code == 400:
                 msg = "Instagram's error message: {}"
                 self.logger.info(msg.format(response_data.get("message")))
                 if "error_type" in response_data:
                     msg = "Error type: {}".format(response_data["error_type"])
                 self.logger.info(msg)
+            """
 
             # For debugging
             try:
@@ -981,7 +984,7 @@ class API(object):
     def get_self_user_feed(self, max_id="", min_timestamp=None):
         return self.get_user_feed(self.user_id, max_id, min_timestamp)
 
-    def get_hashtag_feed(self, hashtag, max_id="", ranked_content=True):
+    def get_hashtag_feed(self, hashtag, max_id="", ranked_content=False):
         url = "feed/tag/{hashtag}/?max_id={max_id}&rank_token={rank_token}&ranked_content={ranked_content}&"
         url = url.format(hashtag=hashtag, max_id=max_id, rank_token=self.rank_token, ranked_content=ranked_content)
         return self.send_request(url)
@@ -1451,6 +1454,7 @@ class API(object):
         except JSONDecodeError:
             pass
 
+        self.total_requests += 1
         return response.ok
 
     """
