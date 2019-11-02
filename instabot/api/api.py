@@ -1608,14 +1608,14 @@ class API(object):
                }
             ]
     """
-    def story_question_response(self, media_id, questions_id, response):
+    def story_question_response(self, media_id, question_id, response):
         data = {
             "client_context": self.generate_UUID(True),
             "mutation_token": self.generate_UUID(True),
             "response": response,
             "type": "text"
         }
-        url = "media/{}/{}/story_question_response/".format(media_id, questions_id)
+        url = "media/{}/{}/story_question_response/".format(media_id, question_id)
         return self.send_request(url, self.json_data(data))
 
     def get_user_stories(self, user_id):
