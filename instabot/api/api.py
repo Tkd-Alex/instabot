@@ -481,12 +481,16 @@ class API(object):
             except JSONDecodeError:
                 return False
         else:
+            self.logger.error("Request returns {} error, content: {}".format(response.status_code, response.text))
+
             """
             if response.status_code != 404 and response.status_code != "404":
                 self.logger.error(
                     "Request returns {} error!".format(response.status_code)
                 )
             """
+
+            """ 
             try:
                 response_data = json.loads(response.text)
                 if "feedback_required" in str(response_data.get("message")):
@@ -499,7 +503,9 @@ class API(object):
                 self.logger.error(
                     "Error checking for `feedback_required`, response text is not JSON"
                 )
+            """
 
+            """
             if response.status_code == 429:
                 sleep_minutes = 5
                 self.logger.warning(
@@ -507,6 +513,8 @@ class API(object):
                     "for {} minutes.".format(sleep_minutes)
                 )
                 time.sleep(sleep_minutes * 60)
+            """
+
             """
             elif response.status_code == 400:
                 msg = "Instagram's error message: {}"
@@ -534,7 +542,10 @@ class API(object):
 
     @property
     def user_id(self):
-        return self.cookie_dict["ds_user_id"]
+        try:
+            return self.cookie_dict["ds_user_id"]
+        except Exception as e:
+            return self.cookie_dict['sessionid'].split(":")[0]
 
     @property
     def rank_token(self):
@@ -1539,7 +1550,7 @@ class API(object):
         if vote_random is True:
             vote = round(random.uniform(0.10, 1), 7)
         url = "media/{}/{}/story_slider_vote/".format(media_id, slider_id)
-        return self.send_request(url, self.json_data({"vote": vote}))
+        return self.send_request(url, self.json_data({"vote": str(vote)}))
 
     """
     /api/v1/media/216241xxxx932_5658xxx17/178xx3572937/story_poll_vote/
@@ -1583,7 +1594,7 @@ class API(object):
         if vote_random is True:
             vote = random.randint(0, 1)
         url = "media/{}/{}/story_poll_vote/".format(media_id, poll_id)
-        return self.send_request(url, self.json_data({"vote": vote}))
+        return self.send_request(url, self.json_data({"vote": str(vote)}))
 
     def get_user_stories(self, user_id):
         url = "feed/user/{}/story/".format(user_id)
