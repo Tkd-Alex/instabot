@@ -185,61 +185,68 @@ def load_uuid_and_cookie(self, load_uuid=True, load_cookie=True):
     if os.path.isfile(self.cookie_fname) is False:
         return False
 
-    with open(self.cookie_fname, "r") as f:
-        data = json.load(f)
-        if "cookie" in data:
-            self.last_login = data["timing_value"]["last_login"]
-            self.last_experiments = data["timing_value"]["last_experiments"]
+    try:
+        with open(self.cookie_fname, "r") as f:
+            data = json.load(f)
+    except Exception as e:
+        self.logger.info(
+            "Exception {} during json.load file. Return false and create a new cookie file".format(e)
+        )
+        return False
 
-            if load_cookie:
-                self.session.cookies = requests.utils.cookiejar_from_dict(
-                    data["cookie"]
-                )
-                cookie_username = self.cookie_dict["ds_user"]
-                assert cookie_username == self.username
+    if "cookie" in data:
+        self.last_login = data["timing_value"]["last_login"]
+        self.last_experiments = data["timing_value"]["last_experiments"]
 
-            if load_uuid:
-                self.phone_id = data["uuids"]["phone_id"]
-                self.uuid = data["uuids"]["uuid"]
-                self.client_session_id = data["uuids"]["client_session_id"]
-                self.advertising_id = data["uuids"]["advertising_id"]
-                self.device_id = data["uuids"]["device_id"]
-
-                self.device_settings = data["device_settings"]
-                self.user_agent = data["user_agent"]
-
-            """
-            self.logger.info(
-                "Recovery from {}: COOKIE {} - UUIDs {} - TIMING, DEVICE and ... \n- user-agent={}\n- phone_id={}\n- uuid={}\n- client_session_id={}\n- device_id={}".format(
-                    self.cookie_fname,
-                    load_cookie,
-                    load_uuid,
-                    self.user_agent,
-                    self.phone_id,
-                    self.uuid,
-                    self.client_session_id,
-                    self.device_id,
-                )
+        if load_cookie:
+            self.session.cookies = requests.utils.cookiejar_from_dict(
+                data["cookie"]
             )
-            """
-            self.logger.info(
-                "Recovery from {}: COOKIE {} - UUIDs {} - TIMING, DEVICE and OTHER DATAS...".format(
-                    self.cookie_fname,
-                    load_cookie,
-                    load_uuid
-                )
-            )
-        else:
-            self.logger.info(
-                "The cookie seems to be the with the older structure. Load and init again all uuids"
-            )
-            self.session.cookies = requests.utils.cookiejar_from_dict(data)
-            self.last_login = time.time()
-            self.last_experiments = time.time()
             cookie_username = self.cookie_dict["ds_user"]
             assert cookie_username == self.username
-            self.set_device()
-            self.generate_all_uuids()
+
+        if load_uuid:
+            self.phone_id = data["uuids"]["phone_id"]
+            self.uuid = data["uuids"]["uuid"]
+            self.client_session_id = data["uuids"]["client_session_id"]
+            self.advertising_id = data["uuids"]["advertising_id"]
+            self.device_id = data["uuids"]["device_id"]
+
+            self.device_settings = data["device_settings"]
+            self.user_agent = data["user_agent"]
+
+        """
+        self.logger.info(
+            "Recovery from {}: COOKIE {} - UUIDs {} - TIMING, DEVICE and ... \n- user-agent={}\n- phone_id={}\n- uuid={}\n- client_session_id={}\n- device_id={}".format(
+                self.cookie_fname,
+                load_cookie,
+                load_uuid,
+                self.user_agent,
+                self.phone_id,
+                self.uuid,
+                self.client_session_id,
+                self.device_id,
+            )
+        )
+        """
+        self.logger.info(
+            "Recovery from {}: COOKIE {} - UUIDs {} - TIMING, DEVICE and OTHER DATAS...".format(
+                self.cookie_fname,
+                load_cookie,
+                load_uuid
+            )
+        )
+    else:
+        self.logger.info(
+            "The cookie seems to be the with the older structure. Load and init again all uuids"
+        )
+        self.session.cookies = requests.utils.cookiejar_from_dict(data)
+        self.last_login = time.time()
+        self.last_experiments = time.time()
+        cookie_username = self.cookie_dict["ds_user"]
+        assert cookie_username == self.username
+        self.set_device()
+        self.generate_all_uuids()
 
     self.is_logged_in = True
     return True

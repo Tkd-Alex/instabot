@@ -1596,6 +1596,43 @@ class API(object):
         url = "media/{}/{}/story_poll_vote/".format(media_id, poll_id)
         return self.send_request(url, self.json_data({"vote": str(vote)}))
 
+    """
+    /api/v1/media/21683xxxx7066343_8588684487/17xxx749730392/story_question_response/
+    signed_body=94391bcb0cf52dexxxxxx232f0c87774b.{"client_context":"47abf00e-xxxxx296fc5d5","_csrftoken":"PLLbSfC53xxxxQEYvxMJ","response":"Sempre+e+comunque","_uid":"17852xx39","type":"text","mutation_token":"47axxx831c296fc5d5","_uuid":"ffbe7b2fxxx-c3f51803637e"}&ig_sig_key_version=4
+    "story_questions":[
+               {
+                  "x":0.5,
+                  "y":0.5,
+                  "z":0,
+                  "width":0.7777778,
+                  "height":0.28145695,
+                  "rotation":0.0,
+                  "is_pinned":0,
+                  "is_hidden":0,
+                  "is_sticker":1,
+                  "question_sticker":{
+                     "question_type":"text",
+                     "question_id":17xxx749730392,
+                     "question":"Esketit?",
+                     "media_id":21683xxxx7066343,
+                     "text_color":"#000000",
+                     "background_color":"#ffffff",
+                     "viewer_can_interact":true,
+                     "profile_pic_url":""
+                  }
+               }
+            ]
+    """
+    def story_question_response(self, media_id, question_id, response):
+        data = {
+            "client_context": self.generate_UUID(True),
+            "mutation_token": self.generate_UUID(True),
+            "response": response,
+            "type": "text"
+        }
+        url = "media/{}/{}/story_question_response/".format(media_id, question_id)
+        return self.send_request(url, self.json_data(data))
+
     def get_user_stories(self, user_id):
         url = "feed/user/{}/story/".format(user_id)
         return self.send_request(url)
