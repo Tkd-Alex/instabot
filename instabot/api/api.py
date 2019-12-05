@@ -490,7 +490,7 @@ class API(object):
                 )
             """
 
-            """ 
+            """
             try:
                 response_data = json.loads(response.text)
                 if "feedback_required" in str(response_data.get("message")):
@@ -1632,6 +1632,41 @@ class API(object):
         }
         url = "media/{}/{}/story_question_response/".format(media_id, question_id)
         return self.send_request(url, self.json_data(data))
+
+    """
+    /api/v1/media/17863xxx85013/follow_story_countdown/
+    signed_body=e6f0c686xxxxxxx8897eec1f78d9b8d21d602c49.{"_csrftoken":"dbCGA1xxxxWvV8yCDhjw","_uid":"1785xxx439","_uuid":"ffbe7b2f-166xxxx3637e"}&ig_sig_key_version=4
+    "story_countdowns":[
+    {
+        "x":0.36236402,
+        "y":0.67162275,
+        "z":0,
+        "width":0.75,
+        "height":0.25496688,
+        "rotation":0.0,
+        "is_pinned":0,
+        "is_hidden":0,
+        "is_sticker":1,
+        "countdown_sticker":{
+            "countdown_id":17863xxx85013,
+            "end_ts":1576969200,
+            "text":"VIAGGIO IN FRANCIA ",
+            "text_color":"#ffffff",
+            "start_background_color":"#ca2ee1",
+            "end_background_color":"#5eb1ff",
+            "digit_color":"#7e0091",
+            "digit_card_color":"#ffffffcc",
+            "following_enabled":true,
+            "is_owner":false,
+            "attribution":null,
+            "viewer_is_following":false
+        }
+    }
+    ]
+    """
+    def follow_story_countdown(self, countdown_id):
+        url = "media/{}/follow_story_countdown/".format(countdown_id)
+        return self.send_request(url)
 
     def get_user_stories(self, user_id):
         url = "feed/user/{}/story/".format(user_id)
