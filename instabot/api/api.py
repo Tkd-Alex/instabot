@@ -405,7 +405,7 @@ class API(object):
         if month is None:
             month = random.randint(1, 12)
         if year is None:
-            year = random.randint(1961, 200)
+            year = random.randint(1961, 2000)
         data = self.json_data({
             "current_screen_key": "dob",
             "day": str(day),
@@ -481,7 +481,7 @@ class API(object):
             except JSONDecodeError:
                 return False
         else:
-            self.logger.error("Request returns {} error, content: {}".format(response.status_code, response.text))
+            self.logger.error("[{}] : {} ...".format(response.status_code, response.text[:170]))
 
             """
             if response.status_code != 404 and response.status_code != "404":
@@ -530,6 +530,10 @@ class API(object):
                 self.last_json = json.loads(response.text)
             except Exception:
                 pass
+
+            if self.last_json.get("message", "") == "consent_required":
+                return self.consent_required()
+
             return False
 
     @property
@@ -1634,7 +1638,9 @@ class API(object):
         return self.send_request(url, self.json_data(data))
 
     def get_user_stories(self, user_id):
-        url = "feed/user/{}/story/".format(user_id)
+        url = 'feed/user/{}/story/?supported_capabilities_new={}'.format(
+            user_id, config.SUPPORTED_CAPABILITIES
+        )
         return self.send_request(url)
 
     def get_self_story_viewers(self, story_id):

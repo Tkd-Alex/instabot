@@ -55,41 +55,90 @@ def sync_user_features(self):
 
 
 def pre_login_flow(self):
-    self.logger.info("PRE-LOGIN FLOW!... ")
-
-    self.read_msisdn_header("default")
-    self.sync_launcher(True)
-    self.sync_device_features(True)
-    self.log_attribution()
-    self.set_contact_point_prefill("prefill")
+    # self.logger.info("PRE-LOGIN FLOW!... ")
+    if (self.read_msisdn_header("default")) is False:
+        return False
+    if (self.sync_launcher(True)) is False:
+        return False
+    if (self.sync_device_features(True)) is False:
+        return False
+    if (self.log_attribution()) is False:
+        return False
+    if (self.set_contact_point_prefill("prefill")) is False:
+        return False
 
 
 def login_flow(self, just_logged_in=False, app_refresh_interval=1800):
-    self.logger.info("LOGIN FLOW! Just logged-in: {}".format(just_logged_in))
-    check_flow = []
+    # self.logger.info("LOGIN FLOW! Just logged-in: {}".format(just_logged_in))
     if just_logged_in:
         try:
             # SYNC
-            check_flow.append(self.sync_launcher(False))
-            check_flow.append(self.sync_user_features())
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.sync_launcher(False)) is False:
+                return False
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.sync_user_features()) is False:
+                return False
+            
             # Update feed and timeline
-            check_flow.append(self.get_timeline_feed())
-            check_flow.append(self.get_reels_tray_feed(reason="cold_start"))
-            check_flow.append(self.get_suggested_searches("users"))
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_timeline_feed()) is False:
+                return False
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_reels_tray_feed(reason="cold_start")) is False:
+                return False
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_suggested_searches("users")) is False:
+                return False
+            
             # getRecentSearches() ...
-            check_flow.append(self.get_suggested_searches("blended"))
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_suggested_searches("blended")) is False:
+                return False
+            
             # DM-Update
-            check_flow.append(self.get_ranked_recipients("reshare", True))
-            check_flow.append(self.get_ranked_recipients("save", True))
-            check_flow.append(self.get_inbox_v2())
-            check_flow.append(self.get_presence())
-            check_flow.append(self.get_recent_activity())
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_ranked_recipients("reshare", True)) is False:
+                return False
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_ranked_recipients("save", True)) is False:
+                return False
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_inbox_v2()) is False:
+                return False
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_presence()) is False:
+                return False
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_recent_activity()) is False:
+                return False
             # Config and other stuffs
-            check_flow.append(self.get_loom_fetch_config())
-            check_flow.append(self.get_profile_notice())
-            check_flow.append(self.batch_fetch())
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_loom_fetch_config()) is False:
+                return False
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.get_profile_notice()) is False:
+                return False
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.batch_fetch()) is False:
+                return False
+            
             # getBlockedMedia() ...
-            check_flow.append(self.explore(True))
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (self.explore(True)) is False:
+                return False
+            
             # getQPFetch() ...
             # getFacebookOTA() ...
         except Exception as e:
@@ -100,18 +149,24 @@ def login_flow(self, just_logged_in=False, app_refresh_interval=1800):
     else:
         try:
             pull_to_refresh = random.randint(1, 100) % 2 == 0
-            check_flow.append(
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (
                 self.get_timeline_feed(
                     options=["is_pull_to_refresh"] if pull_to_refresh is True else []
                 )
-            )  # Random pull_to_refresh :)
-            check_flow.append(
+            ) is False:  # Random pull_to_refresh :)
+                return False
+            
+            time.sleep(random.uniform(0.02, 0.3))
+            if (
                 self.get_reels_tray_feed(
                     reason="pull_to_refresh"
                     if pull_to_refresh is True
                     else "cold_start"
                 )
-            )
+            ) is False:
+                return False
 
             is_session_expired = (time.time() - self.last_login) > app_refresh_interval
             if is_session_expired:
@@ -119,17 +174,44 @@ def login_flow(self, just_logged_in=False, app_refresh_interval=1800):
                 self.client_session_id = self.generate_UUID(uuid_type=True)
 
                 # getBootstrapUsers() ...
-                check_flow.append(self.get_ranked_recipients("reshare", True))
-                check_flow.append(self.get_ranked_recipients("save", True))
-                check_flow.append(self.get_inbox_v2())
-                check_flow.append(self.get_presence())
-                check_flow.append(self.get_recent_activity())
-                check_flow.append(self.get_profile_notice())
-                check_flow.append(self.explore(False))
+                
+                time.sleep(random.uniform(0.02, 0.3))
+                if (self.get_ranked_recipients("reshare", True)) is False:
+                    return False
+                
+                time.sleep(random.uniform(0.02, 0.3))
+                if (self.get_ranked_recipients("save", True)) is False:
+                    return False
+                
+                time.sleep(random.uniform(0.02, 0.3))
+                if (self.get_inbox_v2()) is False:
+                    return False
+                
+                time.sleep(random.uniform(0.02, 0.3))
+                if (self.get_presence()) is False:
+                    return False
+                
+                time.sleep(random.uniform(0.02, 0.3))
+                if (self.get_recent_activity()) is False:
+                    return False
+                
+                time.sleep(random.uniform(0.02, 0.3))
+                if (self.get_profile_notice()) is False:
+                    return False
+                
+                time.sleep(random.uniform(0.02, 0.3))
+                if (self.explore(False)) is False:
+                    return False
 
             if (time.time() - self.last_experiments) > 7200:
-                check_flow.append(self.sync_user_features())
-                check_flow.append(self.sync_device_features())
+                
+                time.sleep(random.uniform(0.02, 0.3))
+                if (self.sync_user_features()) is False:
+                    return False
+                
+                time.sleep(random.uniform(0.02, 0.3))
+                if (self.sync_device_features()) is False:
+                    return False
         except Exception as e:
             self.logger.error(
                 "Exception raised: {}\n{}".format(e, traceback.format_exc())
@@ -137,7 +219,7 @@ def login_flow(self, just_logged_in=False, app_refresh_interval=1800):
             return False
 
     self.save_uuid_and_cookie()
-    return False if False in check_flow else True
+    return True
 
 
 # ====== DEVICE / CLIENT_ID / PHONE_ID AND OTHER VALUES (uuids) ====== #
