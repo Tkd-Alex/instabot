@@ -532,7 +532,7 @@ class API(object):
                 pass
 
             if self.last_json.get("message", "") == "consent_required":
-                return self.consent_required()
+                self.consent_required()
 
             return False
 

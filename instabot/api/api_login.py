@@ -23,9 +23,7 @@ def sync_device_features(self, login=False):
         data["_uid"] = self.user_id
         data["_csrftoken"] = self.token
     data = json.dumps(data)
-    return self.send_request(
-        "qe/sync/", data, login=login, headers={"X-DEVICE-ID": self.uuid}
-    )
+    return self.send_request("qe/sync/", data, login=login, headers={"X-DEVICE-ID": self.uuid})
 
 
 def sync_launcher(self, login=False):
@@ -76,80 +74,78 @@ def login_flow(self, just_logged_in=False, app_refresh_interval=1800):
             time.sleep(random.uniform(0.02, 0.3))
             if (self.sync_launcher(False)) is False:
                 return False
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.sync_user_features()) is False:
                 return False
-            
+
             # Update feed and timeline
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_timeline_feed()) is False:
                 return False
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_reels_tray_feed(reason="cold_start")) is False:
                 return False
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_suggested_searches("users")) is False:
                 return False
-            
+
             # getRecentSearches() ...
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_suggested_searches("blended")) is False:
                 return False
-            
+
             # DM-Update
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_ranked_recipients("reshare", True)) is False:
                 return False
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_ranked_recipients("save", True)) is False:
                 return False
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_inbox_v2()) is False:
                 return False
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_presence()) is False:
                 return False
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_recent_activity()) is False:
                 return False
             # Config and other stuffs
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_loom_fetch_config()) is False:
                 return False
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.get_profile_notice()) is False:
                 return False
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.batch_fetch()) is False:
                 return False
-            
+
             # getBlockedMedia() ...
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (self.explore(True)) is False:
                 return False
-            
+
             # getQPFetch() ...
             # getFacebookOTA() ...
         except Exception as e:
-            self.logger.error(
-                "Exception raised: {}\n{}".format(e, traceback.format_exc())
-            )
+            self.logger.error("Exception raised: {}\n{}".format(e, traceback.format_exc()))
             return False
     else:
         try:
             pull_to_refresh = random.randint(1, 100) % 2 == 0
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (
                 self.get_timeline_feed(
@@ -157,13 +153,11 @@ def login_flow(self, just_logged_in=False, app_refresh_interval=1800):
                 )
             ) is False:  # Random pull_to_refresh :)
                 return False
-            
+
             time.sleep(random.uniform(0.02, 0.3))
             if (
                 self.get_reels_tray_feed(
-                    reason="pull_to_refresh"
-                    if pull_to_refresh is True
-                    else "cold_start"
+                    reason="pull_to_refresh" if pull_to_refresh is True else "cold_start"
                 )
             ) is False:
                 return False
@@ -174,48 +168,46 @@ def login_flow(self, just_logged_in=False, app_refresh_interval=1800):
                 self.client_session_id = self.generate_UUID(uuid_type=True)
 
                 # getBootstrapUsers() ...
-                
+
                 time.sleep(random.uniform(0.02, 0.3))
                 if (self.get_ranked_recipients("reshare", True)) is False:
                     return False
-                
+
                 time.sleep(random.uniform(0.02, 0.3))
                 if (self.get_ranked_recipients("save", True)) is False:
                     return False
-                
+
                 time.sleep(random.uniform(0.02, 0.3))
                 if (self.get_inbox_v2()) is False:
                     return False
-                
+
                 time.sleep(random.uniform(0.02, 0.3))
                 if (self.get_presence()) is False:
                     return False
-                
+
                 time.sleep(random.uniform(0.02, 0.3))
                 if (self.get_recent_activity()) is False:
                     return False
-                
+
                 time.sleep(random.uniform(0.02, 0.3))
                 if (self.get_profile_notice()) is False:
                     return False
-                
+
                 time.sleep(random.uniform(0.02, 0.3))
                 if (self.explore(False)) is False:
                     return False
 
             if (time.time() - self.last_experiments) > 7200:
-                
+
                 time.sleep(random.uniform(0.02, 0.3))
                 if (self.sync_user_features()) is False:
                     return False
-                
+
                 time.sleep(random.uniform(0.02, 0.3))
                 if (self.sync_device_features()) is False:
                     return False
         except Exception as e:
-            self.logger.error(
-                "Exception raised: {}\n{}".format(e, traceback.format_exc())
-            )
+            self.logger.error("Exception raised: {}\n{}".format(e, traceback.format_exc()))
             return False
 
     self.save_uuid_and_cookie()
@@ -235,9 +227,7 @@ def generate_all_uuids(self):
     self.uuid = self.generate_UUID(uuid_type=True)
     self.client_session_id = self.generate_UUID(uuid_type=True)
     self.advertising_id = self.generate_UUID(uuid_type=True)
-    self.device_id = self.generate_device_id(
-        self.get_seed(self.username, self.password)
-    )
+    self.device_id = self.generate_device_id(self.get_seed(self.username, self.password))
     # self.logger.info("uuid GENERATE! phone_id={}, uuid={}, session_id={}, device_id={}".format( self.phone_id, self.uuid, self.client_session_id, self.device_id ))
 
 
@@ -252,9 +242,7 @@ def change_device_simulation(self):
     self.logger.info("Change device simulation")
     self.reinstall_app_simulation()
     self.logger.info("Generating new `android_device_id`...")
-    self.device_id = self.generate_device_id(
-        self.get_seed(self.generate_UUID(uuid_type=True))
-    )
+    self.device_id = self.generate_device_id(self.get_seed(self.generate_UUID(uuid_type=True)))
     self.save_uuid_and_cookie()
     self.logger.info("New android_device_id: {}".format(self.device_id))
 
@@ -272,7 +260,9 @@ def load_uuid_and_cookie(self, load_uuid=True, load_cookie=True):
             data = json.load(f)
     except Exception as e:
         self.logger.info(
-            "Exception {} during json.load file. Return false and create a new cookie file".format(e)
+            "Exception {} during json.load file. Return false and create a new cookie file".format(
+                e
+            )
         )
         return False
 
@@ -281,9 +271,7 @@ def load_uuid_and_cookie(self, load_uuid=True, load_cookie=True):
         self.last_experiments = data["timing_value"]["last_experiments"]
 
         if load_cookie:
-            self.session.cookies = requests.utils.cookiejar_from_dict(
-                data["cookie"]
-            )
+            self.session.cookies = requests.utils.cookiejar_from_dict(data["cookie"])
             cookie_username = self.cookie_dict["ds_user"]
             assert cookie_username == self.username
 
@@ -313,9 +301,7 @@ def load_uuid_and_cookie(self, load_uuid=True, load_cookie=True):
         """
         self.logger.info(
             "Recovery from {}: COOKIE {} - UUIDs {} - TIMING, DEVICE and OTHER DATAS...".format(
-                self.cookie_fname,
-                load_cookie,
-                load_uuid
+                self.cookie_fname, load_cookie, load_uuid
             )
         )
     else:
@@ -348,10 +334,7 @@ def save_uuid_and_cookie(self):
             "device_id": self.device_id,
         },
         "cookie": requests.utils.dict_from_cookiejar(self.session.cookies),
-        "timing_value": {
-            "last_login": self.last_login,
-            "last_experiments": self.last_experiments,
-        },
+        "timing_value": {"last_login": self.last_login, "last_experiments": self.last_experiments,},
         "device_settings": self.device_settings,
         "user_agent": self.user_agent,
     }
