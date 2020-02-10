@@ -1672,10 +1672,12 @@ class API(object):
         url = "media/{}/follow_story_countdown/".format(countdown_id)
         return self.send_request(url)
 
-    def get_user_stories(self, user_id):
+    def get_user_stories(self, user_id, max_id=""):
         url = 'feed/user/{}/story/?supported_capabilities_new={}'.format(
             user_id, config.SUPPORTED_CAPABILITIES
         )
+        if max_id != "":
+            url += "&max_id={}".format(max_id)
         return self.send_request(url)
 
     def get_self_story_viewers(self, story_id):
