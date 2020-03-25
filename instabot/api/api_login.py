@@ -299,11 +299,13 @@ def load_uuid_and_cookie(self, load_uuid=True, load_cookie=True):
             )
         )
         """
+        """
         self.logger.info(
             "Recovery from {}: COOKIE {} - UUIDs {} - TIMING, DEVICE and OTHER DATAS...".format(
                 self.cookie_fname, load_cookie, load_uuid
             )
         )
+        """
     else:
         self.logger.info(
             "The cookie seems to be the with the older structure. Load and init again all uuids"

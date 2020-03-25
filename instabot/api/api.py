@@ -449,7 +449,7 @@ class API(object):
         self.session.headers.update(
             {
                 "User-Agent": self.user_agent,
-                "X-IG-Connection-Speed": "-1kbps",
+                "X-IG-Connection-Speed": '{0:d}kbps'.format(random.randint(1000, 5000)),
                 "X-IG-Bandwidth-Speed-KBPS": str(random.randint(7000, 10000)),
                 "X-IG-Bandwidth-TotalBytes-B": str(random.randint(500000, 900000)),
                 "X-IG-Bandwidth-TotalTime-MS": str(random.randint(50, 150)),
