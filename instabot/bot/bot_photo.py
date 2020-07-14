@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 
 def upload_photo(
-    self, photo, caption=None, upload_id=None, from_video=False, options={}
+    self, photo, caption=None, upload_id=None, from_video=False, force_resize=True, options={}
 ):
     """Upload photo to Instagram
 
@@ -21,7 +21,7 @@ def upload_photo(
     """
     self.small_delay()
     result = self.api.upload_photo(
-        photo, caption, upload_id, from_video, options=options
+        photo, caption, upload_id, from_video, force_resize, options=options
     )
     if not result:
         self.logger.info("Photo '{}' is not uploaded.".format(photo))

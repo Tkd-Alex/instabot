@@ -696,7 +696,7 @@ class Bot(object):
         return download_photos(self, medias, folder, save_description)
 
     def upload_photo(
-        self, photo, caption=None, upload_id=None, from_video=False, options={}
+        self, photo, caption=None, upload_id=None, from_video=False, force_resize=True, options={}
     ):
         """Upload photo to Instagram
 
@@ -710,7 +710,7 @@ class Bot(object):
 
         @return              Object with state of uploading to Instagram (or False)
         """
-        return upload_photo(self, photo, caption, upload_id, from_video, options)
+        return upload_photo(self, photo, caption, upload_id, from_video, force_resize, options)
 
     # video
     def upload_video(self, video, caption="", thumbnail=None, options={}):

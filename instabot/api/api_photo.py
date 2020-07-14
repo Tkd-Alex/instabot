@@ -10,8 +10,6 @@ import json
 
 from uuid import uuid4
 
-from . import config
-
 
 def download_photo(self, media_id, filename, media=False, folder="photos"):
     if not media:
@@ -121,17 +119,43 @@ def upload_photo(
     @return Boolean
     """
     options = dict({"configure_timeout": 15, "rename": True}, **(options or {}))
-    if upload_id is None:
-        upload_id = str(int(time.time() * 1000))
-    if not photo:
-        return False
+
     if not compatible_aspect_ratio(get_image_size(photo)):
         self.logger.error("Photo does not have a compatible photo aspect ratio.")
         if force_resize:
             photo = resize_image(photo)
         else:
             return False
+
+    upload_id = rupload_igphoto(
+        self.session, photo, caption=caption, upload_id=upload_id, from_video=from_video
+    )
+    if type(upload_id) == bool:
+        return upload_id
+
+    configure_timeout = options.get("configure_timeout")
+    for attempt in range(4):
+        if configure_timeout:
+            time.sleep(configure_timeout)
+
+        if self.configure_photo(upload_id, photo, caption):
+            media = self.last_json.get("media")
+            self.expose()
+            if options.get("rename"):
+                os.rename(photo, "{fname}.REMOVE_ME".format(fname=photo))
+            return media
+    return False
+
+
+def rupload_igphoto(session, photo, caption=None, upload_id=None, from_video=False):
+    if upload_id is None:
+        upload_id = str(int(time.time() * 1000))
+
+    if not photo:
+        return False
+
     waterfall_id = str(uuid4())
+
     # upload_name example: '1576102477530_0_7823256191'
     upload_name = "{upload_id}_0_{rand}".format(
         upload_id=upload_id, rand=random.randint(1000000000, 9999999999)
@@ -147,7 +171,7 @@ def upload_photo(
     }
     photo_data = open(photo, "rb").read()
     photo_len = str(len(photo_data))
-    self.session.headers.update(
+    session.headers.update(
         {
             "X-IG-Connection-Type": "WIFI",
             "X-IG-Capabilities": "3brTvwE=",  # old "3Q4="
@@ -163,27 +187,15 @@ def upload_photo(
             "Accept-Encoding": "gzip",
         }
     )
-    response = self.session.post(
+    response = session.post(
         "https://i.instagram.com/rupload_igphoto/{name}".format(name=upload_name),
         data=photo_data,
     )
     if response.status_code != 200:
         return False
     if from_video:
-        # Not configure when from_video is True
         return True
-    # CONFIGURE
-    configure_timeout = options.get("configure_timeout")
-    for attempt in range(4):
-        if configure_timeout:
-            time.sleep(configure_timeout)
-        if self.configure_photo(upload_id, photo, caption):
-            media = self.last_json.get("media")
-            self.expose()
-            if options.get("rename"):
-                os.rename(photo, "{fname}.REMOVE_ME".format(fname=photo))
-            return media
-    return False
+    return upload_id
 
 
 def get_image_size(fname):

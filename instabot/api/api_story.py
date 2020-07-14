@@ -1,15 +1,11 @@
 from __future__ import unicode_literals
 
-import json
 import os
 import shutil
 import time
 from random import randint
 
-from requests_toolbelt import MultipartEncoder
-
-from . import config
-from .api_photo import get_image_size, stories_shaper
+from .api_photo import get_image_size, stories_shaper, rupload_igphoto
 
 
 def download_story(self, filename, story_url, username):
@@ -28,48 +24,25 @@ def download_story(self, filename, story_url, username):
         return os.path.abspath(fname)
 
 
-def upload_story_photo(self, photo, upload_id=None):
-    if upload_id is None:
-        upload_id = str(int(time.time() * 1000))
+def upload_story_photo(self, photo, upload_id=None, options={}):
+    options = dict({"configure_timeout": 15, "rename": True}, **(options or {}))
     photo = stories_shaper(photo)
-    if not photo:
-        return False
 
-    with open(photo, "rb") as f:
-        photo_bytes = f.read()
+    upload_id = rupload_igphoto(self.session, photo, upload_id=upload_id)
+    if type(upload_id) == bool:
+        return upload_id
 
-    data = {
-        "upload_id": upload_id,
-        "_uuid": self.uuid,
-        "_csrftoken": self.token,
-        "image_compression": '{"lib_name":"jt","lib_version":"1.3.0","quality":"87"}',
-        "photo": (
-            "pending_media_%s.jpg" % upload_id,
-            photo_bytes,
-            "application/octet-stream",
-            {"Content-Transfer-Encoding": "binary"},
-        ),
-    }
-    m = MultipartEncoder(data, boundary=self.uuid)
-    self.session.headers.update(
-        {
-            "X-IG-Capabilities": "3Q4=",
-            "X-IG-Connection-Type": "WIFI",
-            "Cookie2": "$Version=1",
-            "Accept-Language": "en-US",
-            "Accept-Encoding": "gzip, deflate",
-            "Content-type": m.content_type,
-            "Connection": "close",
-            "User-Agent": self.user_agent,
-        }
-    )
-    response = self.session.post(config.API_URL + "upload/photo/", data=m.to_string())
+    configure_timeout = options.get("configure_timeout")
+    for attempt in range(4):
+        if configure_timeout:
+            time.sleep(configure_timeout)
 
-    if response.status_code == 200:
-        upload_id = json.loads(response.text).get("upload_id")
         if self.configure_story(upload_id, photo):
-            # self.expose()
-            return True
+            media = self.last_json.get("media")
+            self.expose()
+            if options.get("rename"):
+                os.rename(photo, "{fname}.REMOVE_ME".format(fname=photo))
+            return media
     return False
 
 
