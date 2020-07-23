@@ -997,7 +997,7 @@ class API(object):
         return self.send_request(url)
 
     def get_self_user_feed(self, max_id="", min_timestamp=None):
-        return self.get_user_feed(self.user_id, max_id, min_timestamp)
+        return self.get_user_feed(self.user_id, max_id=max_id, min_timestamp=min_timestamp)
 
     def get_hashtag_feed(self, hashtag, max_id="", ranked_content=False):
         url = "feed/tag/{hashtag}/?max_id={max_id}&rank_token={rank_token}&ranked_content={ranked_content}&"
@@ -1275,7 +1275,8 @@ class API(object):
             if len(user_feed) >= float(amount):
                 # one request returns max 13 items
                 return user_feed[:amount]
-            self.get_user_feed(user_id, next_max_id, min_timestamp)
+            self.get_user_feed(user_id, max_id=next_max_id, min_timestamp=min_timestamp)
+            time.sleep(0.2)
             last_json = self.last_json
             if "items" not in last_json:
                 return user_feed
