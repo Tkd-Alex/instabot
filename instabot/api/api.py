@@ -1794,7 +1794,7 @@ class API(object):
     def move_direct(self, thread_id, folder=1):
         url = "direct_v2/threads/{}/move/".format(thread_id)
         data = self.json_data({"_uuid": self.uuid, "_csrftoken": self.token, "folder": folder})
-        return self.send_request(url, data, with_signature=False)
+        return self.send_request(url, data, with_signature=True)
 
     # ACCEPT button in pending request
     def approve_pending_thread(self, thread_id):
