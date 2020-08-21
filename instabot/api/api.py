@@ -461,78 +461,36 @@ class API(object):
             self.total_requests += 1
             if post is not None:  # POST
                 if with_signature:
-                    post = self.generate_signature(
-                        post
-                    )  # Only `send_direct_item` doesn't need a signature
+                    # Only `send_direct_item` doesn't need a signature
+                    post = self.generate_signature(post)  
                     if extra_sig is not None and extra_sig != []:
                         post += "&".join(extra_sig)
                 response = self.session.post(config.API_URL + endpoint, data=post)
             else:  # GET
                 response = self.session.get(config.API_URL + endpoint)
         except Exception as e:
-            self.logger.warning(str(e))
+            # self.logger.warning(str(e))
             return False
 
         self.last_response = response
+
         if response.status_code == 200:
             try:
                 self.last_json = json.loads(response.text)
                 return True
-            except JSONDecodeError:
+            except JSONDecodeError as e:
+                # self.logger.warning(str(e))
                 return False
         else:
-            self.logger.error("[{}] : {} ...".format(response.status_code, response.text[:170]))
+            # self.logger.warning("[{}] : {} ...".format(response.status_code, response.text[:170]))
 
-            """
-            if response.status_code != 404 and response.status_code != "404":
-                self.logger.error(
-                    "Request returns {} error!".format(response.status_code)
-                )
-            """
-
-            """
-            try:
-                response_data = json.loads(response.text)
-                if "feedback_required" in str(response_data.get("message")):
-                    self.logger.error(
-                        "ATTENTION!: `feedback_required`"
-                        + str(response_data.get("feedback_message"))
-                    )
-                    return "feedback_required"
-            except ValueError:
-                self.logger.error(
-                    "Error checking for `feedback_required`, response text is not JSON"
-                )
-            """
-
-            """
-            if response.status_code == 429:
-                sleep_minutes = 5
-                self.logger.warning(
-                    "That means 'too many requests'. I'll go to sleep "
-                    "for {} minutes.".format(sleep_minutes)
-                )
-                time.sleep(sleep_minutes * 60)
-            """
-
-            """
-            elif response.status_code == 400:
-                msg = "Instagram's error message: {}"
-                self.logger.info(msg.format(response_data.get("message")))
-                if "error_type" in response_data:
-                    msg = "Error type: {}".format(response_data["error_type"])
-                self.logger.info(msg)
-            """
-
-            # For debugging
-            try:
-                self.last_response = response
+            try: # For debugging
                 self.last_json = json.loads(response.text)
-            except Exception:
+            except JSONDecodeError:
                 pass
 
-            if self.last_json.get("message", "") == "consent_required":
-                self.consent_required()
+            # if self.last_json.get("message", "") == "consent_required":
+            #     self.consent_required()
 
             return False
 
