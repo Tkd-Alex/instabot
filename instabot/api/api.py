@@ -1833,6 +1833,11 @@ class API(object):
         url = "direct_v2/pending_inbox/?persistentBadging=true&use_unified_inbox=true"
         return self.send_request(url)
 
+    def move_direct(self, thread_id, folder=1):
+        url = "direct_v2/threads/{}/move/".format(thread_id)
+        data = self.json_data({"_uuid": self.uuid, "_csrftoken": self.token, "folder": folder})
+        return self.send_request(url, data, with_signature=False)
+
     # ACCEPT button in pending request
     def approve_pending_thread(self, thread_id):
         data = self.json_data({"_uuid": self.uuid, "_csrftoken": self.token})
