@@ -462,13 +462,13 @@ class API(object):
             if post is not None:  # POST
                 if with_signature:
                     # Only `send_direct_item` doesn't need a signature
-                    post = self.generate_signature(post)  
+                    post = self.generate_signature(post)
                     if extra_sig is not None and extra_sig != []:
                         post += "&".join(extra_sig)
                 response = self.session.post(config.API_URL + endpoint, data=post)
             else:  # GET
                 response = self.session.get(config.API_URL + endpoint)
-        except Exception as e:
+        except Exception:  # as e:
             # self.logger.warning(str(e))
             return False
 
@@ -506,7 +506,7 @@ class API(object):
     def user_id(self):
         try:
             return self.cookie_dict["ds_user_id"]
-        except Exception as e:
+        except Exception:
             return self.cookie_dict['sessionid'].split(":")[0]
 
     @property
@@ -1791,28 +1791,30 @@ class API(object):
         url = "direct_v2/pending_inbox/?persistentBadging=true&use_unified_inbox=true"
         return self.send_request(url)
 
-    def move_direct(self, thread_id, folder=1):
+    def label_thread(self, thread_id, thread_label=1):
+        url = "direct_v2/threads/{}/label/".format(thread_id)
+        data = self.json_data({"thread_label": thread_label})
+        return self.send_request(url, post=data)
+
+    def move_thread(self, thread_id, folder=1):
         url = "direct_v2/threads/{}/move/".format(thread_id)
-        data = self.json_data({"_uuid": self.uuid, "_csrftoken": self.token, "folder": folder})
-        return self.send_request(url, data, with_signature=True)
+        data = self.json_data({"folder": folder})
+        return self.send_request(url, post=data)
 
     # ACCEPT button in pending request
     def approve_pending_thread(self, thread_id):
-        data = self.json_data({"_uuid": self.uuid, "_csrftoken": self.token})
         url = "direct_v2/threads/{}/approve/".format(thread_id)
-        return self.send_request(url, post=data)
+        return self.send_request(url, post=self.json_data())
 
     # DELETE button in pending request
     def hide_pending_thread(self, thread_id):
-        data = self.json_data({"_uuid": self.uuid, "_csrftoken": self.token})
         url = "direct_v2/threads/{}/hide/".format(thread_id)
-        return self.send_request(url, post=data)
+        return self.send_request(url, post=self.json_data())
 
     # BLOCK button in pending request
     def decline_pending_thread(self, thread_id):
-        data = self.json_data({"_uuid": self.uuid, "_csrftoken": self.token})
         url = "direct_v2/threads/{}/decline/".format(thread_id)
-        return self.send_request(url, post=data)
+        return self.send_request(url, post=self.json_data())
 
     def open_instagram_link(self, link):
         return self.send_request(

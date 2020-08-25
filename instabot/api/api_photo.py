@@ -76,10 +76,12 @@ def configure_photo(self, upload_id, photo, caption=""):
     width, height = get_image_size(photo)
     data = self.json_data(
         {
+            "timezone_offset": 0,
             "media_folder": "Instagram",
             "source_type": 4,
             "caption": caption,
             "upload_id": upload_id,
+            # "device_id": self.device_id,
             "device": self.device_settings,
             "edits": {
                 "crop_original_size": [width * 1.0, height * 1.0],
@@ -128,7 +130,7 @@ def upload_photo(
             return False
 
     upload_id = rupload_igphoto(
-        self.session, photo, caption=caption, upload_id=upload_id, from_video=from_video
+        self.session, photo, upload_id=upload_id, from_video=from_video
     )
     if type(upload_id) == bool:
         return upload_id
@@ -147,7 +149,20 @@ def upload_photo(
     return False
 
 
-def rupload_igphoto(session, photo, caption=None, upload_id=None, from_video=False):
+def edit_photo(self, media_id, caption_text="", container_module="edit_media_info", is_carousel_bumped_post=False, feed_position=0, location={}, usertags={"in": []}):
+    data = self.json_data({
+        # "device_id": self.device_id,
+        "caption_text": caption_text,
+        "container_module": container_module,
+        "feed_position": feed_position,
+        "is_carousel_bumped_post": is_carousel_bumped_post,
+        "location": location,
+        "usertags": usertags
+    })
+    return self.send_request("media/{}/edit_media/".format(media_id), data)
+
+
+def rupload_igphoto(session, photo, upload_id=None, from_video=False):
     if upload_id is None:
         upload_id = str(int(time.time() * 1000))
 
