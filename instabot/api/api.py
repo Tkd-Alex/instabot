@@ -1720,9 +1720,14 @@ class API(object):
         return self.send_request("users/profile_notice/")
 
     # ====== DIRECT METHODS ====== #
-    def get_inbox_v2(self):
-        data = json.dumps({"persistentBadging": True, "use_unified_inbox": True})
-        return self.send_request("direct_v2/inbox/", data)
+    def get_inbox_v2(self, visual_message_return_type='unseen', thread_message_limit=10, persistentBadging=True, limit=20):
+        url = "direct_v2/inbox/?visual_message_return_type={}&thread_message_limit={}&persistentBadging={}&limit={}".format(
+            visual_message_return_type,
+            thread_message_limit,
+            persistentBadging,
+            limit
+        )
+        return self.send_request(url)
 
     def get_presence(self):
         return self.send_request("direct_v2/get_presence/")
@@ -1787,14 +1792,34 @@ class API(object):
 
         return self.send_request(url, data, with_signature=False, headers=headers)
 
-    def get_pending_inbox(self):
-        url = "direct_v2/pending_inbox/?persistentBadging=true&use_unified_inbox=true"
+    def get_pending_inbox(self, visual_message_return_type='unseen', selected_filter='relevant', sort_order='relevant', persistentBadging=True):
+        url = "direct_v2/pending_inbox/?visual_message_return_type={}&selected_filter={}&sort_order={}&persistentBadging={}".format(
+            visual_message_return_type,
+            selected_filter,
+            sort_order,
+            persistentBadging
+        )
         return self.send_request(url)
 
-    def label_thread(self, thread_id, thread_label=1):
+    def label_thread(self, thread_id):
         url = "direct_v2/threads/{}/label/".format(thread_id)
-        data = self.json_data({"thread_label": thread_label})
+        data = self.json_data({"thread_label": 1})
         return self.send_request(url, post=data)
+
+    def unlabel_thread(self, thread_id):
+        url = "direct_v2/threads/{}/unlabel/".format(thread_id)
+        return self.send_request(url, post=self.json_data())
+
+    def read_thread(self, thread_id, cursor, seq_id, visual_message_return_type="unseen", direction="older", limit=10):
+        url = "direct_v2/threads/{}/?visual_message_return_type={}&cursor={}&direction={}&seq_id={}&limit={}".format(
+            thread_id,
+            visual_message_return_type,
+            cursor,
+            direction,
+            seq_id,
+            limit
+        )
+        return self.send_request(url)
 
     def move_thread(self, thread_id, folder=1):
         url = "direct_v2/threads/{}/move/".format(thread_id)
