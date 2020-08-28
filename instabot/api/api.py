@@ -1810,8 +1810,8 @@ class API(object):
         url = "direct_v2/threads/{}/unlabel/".format(thread_id)
         return self.send_request(url, post=self.json_data())
 
-    def read_thread(self, thread_id, cursor, seq_id, visual_message_return_type="unseen", direction="older", limit=10):
-        url = "direct_v2/threads/{}/?visual_message_return_type={}&cursor={}&direction={}&seq_id={}&limit={}".format(
+    def read_thread(self, thread_id, cursor=None, seq_id=None, visual_message_return_type="unseen", direction="older", limit=10):
+        url = "direct_v2/threads/{}/?visual_message_return_type={}&direction={}&limit={}".format(
             thread_id,
             visual_message_return_type,
             cursor,
@@ -1819,6 +1819,10 @@ class API(object):
             seq_id,
             limit
         )
+        if cursor is not None:
+            url += "&cursor={}".format(cursor)
+        if seq_id is not None:
+            url += "&seq_id={}".format(seq_id)
         return self.send_request(url)
 
     def move_thread(self, thread_id, folder=1):
