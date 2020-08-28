@@ -175,7 +175,7 @@ class API(object):
         generate_all_uuids=True,
         solve_challenge=False,
         solve_2fa=False,
-        is_threaded=True
+        is_threaded=True,
     ):
         if password is None:
             username, password = get_credentials(username=username)
@@ -246,7 +246,9 @@ class API(object):
                 self.login_flow(True)
                 # self.device_id = self.uuid
                 return True
-            elif self.last_json.get("error_type", "") == "checkpoint_challenge_required":
+            elif (
+                self.last_json.get("error_type", "") == "checkpoint_challenge_required"
+            ):
                 self.logger.info("Checkpoint challenge required...")
                 if solve_challenge is True:
                     solved = self.solve_challenge()
@@ -264,7 +266,9 @@ class API(object):
                 self.logger.info("Two-factor authentication required")
                 if solve_2fa is True:
                     two_factor_code = input("Enter 2FA verification code: ")
-                    two_factor_id = self.last_json["two_factor_info"]["two_factor_identifier"]
+                    two_factor_id = self.last_json["two_factor_info"][
+                        "two_factor_identifier"
+                    ]
 
                     login = self.session.post(
                         config.API_URL + "accounts/two_factor_login/",
@@ -406,12 +410,14 @@ class API(object):
             month = random.randint(1, 12)
         if year is None:
             year = random.randint(1961, 2000)
-        data = self.json_data({
-            "current_screen_key": "dob",
-            "day": str(day),
-            "month": str(month),
-            "year": str(year)
-        })
+        data = self.json_data(
+            {
+                "current_screen_key": "dob",
+                "day": str(day),
+                "month": str(month),
+                "year": str(year),
+            }
+        )
         url = "consent/existing_user_flow/"
         return self.send_request(url, data)
 
@@ -449,7 +455,7 @@ class API(object):
         self.session.headers.update(
             {
                 "User-Agent": self.user_agent,
-                "X-IG-Connection-Speed": '{0:d}kbps'.format(random.randint(1000, 5000)),
+                "X-IG-Connection-Speed": "{0:d}kbps".format(random.randint(1000, 5000)),
                 "X-IG-Bandwidth-Speed-KBPS": str(random.randint(7000, 10000)),
                 "X-IG-Bandwidth-TotalBytes-B": str(random.randint(500000, 900000)),
                 "X-IG-Bandwidth-TotalTime-MS": str(random.randint(50, 150)),
@@ -484,7 +490,7 @@ class API(object):
         else:
             # self.logger.warning("[{}] : {} ...".format(response.status_code, response.text[:170]))
 
-            try: # For debugging
+            try:  # For debugging
                 self.last_json = json.loads(response.text)
             except JSONDecodeError:
                 pass
@@ -507,7 +513,7 @@ class API(object):
         try:
             return self.cookie_dict["ds_user_id"]
         except Exception:
-            return self.cookie_dict['sessionid'].split(":")[0]
+            return self.cookie_dict["sessionid"].split(":")[0]
 
     @property
     def rank_token(self):
@@ -740,13 +746,7 @@ class API(object):
     def check_offensive_comment(self, comment_text):
         return self.send_request(
             endpoint="media/comment/check_offensive_comment/",
-            post=self.json_data(
-                self.action_data(
-                    {
-                        "comment_text": comment_text
-                    }
-                )
-            ),
+            post=self.json_data(self.action_data({"comment_text": comment_text})),
         )
 
     def comment(self, media_id, comment_text):
@@ -955,11 +955,18 @@ class API(object):
         return self.send_request(url)
 
     def get_self_user_feed(self, max_id="", min_timestamp=None):
-        return self.get_user_feed(self.user_id, max_id=max_id, min_timestamp=min_timestamp)
+        return self.get_user_feed(
+            self.user_id, max_id=max_id, min_timestamp=min_timestamp
+        )
 
     def get_hashtag_feed(self, hashtag, max_id="", ranked_content=False):
         url = "feed/tag/{hashtag}/?max_id={max_id}&rank_token={rank_token}&ranked_content={ranked_content}&"
-        url = url.format(hashtag=hashtag, max_id=max_id, rank_token=self.rank_token, ranked_content=ranked_content)
+        url = url.format(
+            hashtag=hashtag,
+            max_id=max_id,
+            rank_token=self.rank_token,
+            ranked_content=ranked_content,
+        )
         return self.send_request(url)
 
     def get_location_feed(self, location_id, max_id=""):
@@ -1473,13 +1480,10 @@ class API(object):
         }
     ]
     """
+
     def story_quiz_answer(self, media_id, quiz_id, answer=0):
         url = "media/{}/{}/story_quiz_answer/".format(media_id, quiz_id)
-        data = {
-            "answer": 0,
-            "_csrftoken": self.token,
-            "_uuid": self.uuid
-        }
+        data = {"answer": 0, "_csrftoken": self.token, "_uuid": self.uuid}
         return self.send_request(url, data, with_signature=False)
 
     """
@@ -1509,6 +1513,7 @@ class API(object):
         }
     ]
     """
+
     def story_slider_vote(self, media_id, slider_id, vote=0.5000000, vote_random=True):
         if vote_random is True:
             vote = round(random.uniform(0.10, 1), 7)
@@ -1553,6 +1558,7 @@ class API(object):
         }
     ]
     """
+
     def story_poll_vote(self, media_id, poll_id, vote=0, vote_random=True):
         if vote_random is True:
             vote = random.randint(0, 1)
@@ -1586,12 +1592,13 @@ class API(object):
                }
             ]
     """
+
     def story_question_response(self, media_id, question_id, response):
         data = {
             "client_context": self.generate_UUID(True),
             "mutation_token": self.generate_UUID(True),
             "response": response,
-            "type": "text"
+            "type": "text",
         }
         url = "media/{}/{}/story_question_response/".format(media_id, question_id)
         return self.send_request(url, self.json_data(data))
@@ -1627,12 +1634,13 @@ class API(object):
     }
     ]
     """
+
     def follow_story_countdown(self, countdown_id):
         url = "media/{}/follow_story_countdown/".format(countdown_id)
         return self.send_request(url)
 
     def get_user_stories(self, user_id):
-        url = 'feed/user/{}/story/?supported_capabilities_new={}'.format(
+        url = "feed/user/{}/story/?supported_capabilities_new={}".format(
             user_id, config.SUPPORTED_CAPABILITIES
         )
         return self.send_request(url)
@@ -1668,7 +1676,9 @@ class API(object):
         return self.send_request(url)
 
     # Copied from burped device and SSL-Pinned IG-Version.
-    def get_hashtag_sections(self, hashtag, page=0, next_max_id="", next_media_ids=[], tab="recent"):
+    def get_hashtag_sections(
+        self, hashtag, page=0, next_max_id="", next_media_ids=[], tab="recent"
+    ):
         data = "?_csrftoken={}".format(self.token)
         data += "&rank_token={}".format(self.rank_token)
         data += "&_uuid={}".format(self.uuid)
@@ -1720,13 +1730,22 @@ class API(object):
         return self.send_request("users/profile_notice/")
 
     # ====== DIRECT METHODS ====== #
-    def get_inbox_v2(self, visual_message_return_type='unseen', thread_message_limit=10, persistentBadging=True, limit=20):
+    def get_inbox_v2(
+        self,
+        visual_message_return_type="unseen",
+        thread_message_limit=10,
+        persistentBadging=True,
+        limit=20,
+        cursor=None,
+        folder=None,
+    ):
         url = "direct_v2/inbox/?visual_message_return_type={}&thread_message_limit={}&persistentBadging={}&limit={}".format(
-            visual_message_return_type,
-            thread_message_limit,
-            persistentBadging,
-            limit
+            visual_message_return_type, thread_message_limit, persistentBadging, limit
         )
+        if cursor is not None:
+            url += "&cursor={}".format(cursor)
+        if folder is not None:
+            url += "&folder={}".format(folder)
         return self.send_request(url)
 
     def get_presence(self):
@@ -1792,12 +1811,15 @@ class API(object):
 
         return self.send_request(url, data, with_signature=False, headers=headers)
 
-    def get_pending_inbox(self, visual_message_return_type='unseen', selected_filter='relevant', sort_order='relevant', persistentBadging=True):
+    def get_pending_inbox(
+        self,
+        visual_message_return_type="unseen",
+        selected_filter="relevant",
+        sort_order="relevant",
+        persistentBadging=True,
+    ):
         url = "direct_v2/pending_inbox/?visual_message_return_type={}&selected_filter={}&sort_order={}&persistentBadging={}".format(
-            visual_message_return_type,
-            selected_filter,
-            sort_order,
-            persistentBadging
+            visual_message_return_type, selected_filter, sort_order, persistentBadging
         )
         return self.send_request(url)
 
@@ -1810,14 +1832,17 @@ class API(object):
         url = "direct_v2/threads/{}/unlabel/".format(thread_id)
         return self.send_request(url, post=self.json_data())
 
-    def read_thread(self, thread_id, cursor=None, seq_id=None, visual_message_return_type="unseen", direction="older", limit=10):
+    def read_thread(
+        self,
+        thread_id,
+        cursor=None,
+        seq_id=None,
+        visual_message_return_type="unseen",
+        direction="older",
+        limit=10,
+    ):
         url = "direct_v2/threads/{}/?visual_message_return_type={}&direction={}&limit={}".format(
-            thread_id,
-            visual_message_return_type,
-            cursor,
-            direction,
-            seq_id,
-            limit
+            thread_id, visual_message_return_type, cursor, direction, seq_id, limit
         )
         if cursor is not None:
             url += "&cursor={}".format(cursor)
