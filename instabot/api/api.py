@@ -1832,6 +1832,10 @@ class API(object):
         url = "direct_v2/threads/{}/unlabel/".format(thread_id)
         return self.send_request(url, post=self.json_data())
 
+    def delete_thread(self, thread_id):  # It's the same of hide_pending_thread =_=
+        url = "direct_v2/threads/{}/hide/".format(thread_id)
+        return self.send_request(url, post=self.json_data())
+
     def read_thread(
         self,
         thread_id,
