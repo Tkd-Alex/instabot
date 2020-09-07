@@ -1859,17 +1859,14 @@ class API(object):
         data = self.json_data({"folder": folder})
         return self.send_request(url, post=data)
 
-    # ACCEPT button in pending request
-    def approve_pending_thread(self, thread_id):
+    def approve_pending_thread(self, thread_id, folder=1):  # 1 GENERAL / 0 PRIMARY
         url = "direct_v2/threads/{}/approve/".format(thread_id)
-        return self.send_request(url, post=self.json_data())
+        return self.send_request(url, post=self.json_data({"folder": folder}))
 
-    # DELETE button in pending request
     def hide_pending_thread(self, thread_id):
         url = "direct_v2/threads/{}/hide/".format(thread_id)
         return self.send_request(url, post=self.json_data())
 
-    # BLOCK button in pending request
     def decline_pending_thread(self, thread_id):
         url = "direct_v2/threads/{}/decline/".format(thread_id)
         return self.send_request(url, post=self.json_data())
