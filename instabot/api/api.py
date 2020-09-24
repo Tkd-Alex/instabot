@@ -31,7 +31,7 @@ from .api_login import (
     sync_launcher,
     sync_user_features,
 )
-from .api_photo import configure_photo, download_photo, upload_photo
+from .api_photo import configure_photo, download_photo, upload_photo, rupload_igphoto
 from .api_story import configure_story, download_story, upload_story_photo
 from .api_video import configure_video, download_video, upload_video
 from .prepare import delete_credentials, get_credentials
@@ -1335,6 +1335,14 @@ class API(object):
             }
         )
         return self.send_request("accounts/edit_profile/", data)
+
+    def edit_profile_picture(self, photo):
+        upload_id = rupload_igphoto(self.session, photo, upload_id=None)
+        if type(upload_id) == bool:
+            return upload_id
+
+        data = self.json_data({"use_fbuploader": True, "upload_id": upload_id})
+        return self.send_request("accounts/change_profile_picture/", data)
 
     def fb_user_search(self, query):
         url = (
