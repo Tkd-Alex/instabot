@@ -206,6 +206,7 @@ def rupload_igphoto(session, photo, upload_id=None, from_video=False):
         "https://i.instagram.com/rupload_igphoto/{name}".format(name=upload_name),
         data=photo_data,
     )
+    session.headers["Content-Type"] = "application/x-www-form-urlencoded; charset=UTF-8"
     if response.status_code != 200:
         return False
     if from_video:

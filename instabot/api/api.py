@@ -1341,8 +1341,8 @@ class API(object):
         if type(upload_id) == bool:
             return upload_id
 
-        data = self.json_data({"use_fbuploader": True, "upload_id": upload_id})
-        return self.send_request("accounts/change_profile_picture/", data)
+        data = '_csrftoken={}&_uuid={}&use_fbuploader=true&upload_id={}'.format(self.token, self.uuid, upload_id)
+        self.send_request("accounts/change_profile_picture/", data, with_signature=False)
 
     def fb_user_search(self, query):
         url = (
